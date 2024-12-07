@@ -11,35 +11,26 @@ struct Equation {
 }
 
 impl Equation {
-    fn recurse2<I: Iterator<Item = u64> + Clone>(
-        &self,
-        acc: u64,
-        mut iter: I,
-        part2: bool,
-    ) -> bool {
+    fn recurse<I: Iterator<Item = u64> + Clone>(&self, acc: u64, mut iter: I, part2: bool) -> bool {
         if let Some(x) = iter.next() {
             acc < self.total
-                && ((part2 && self.recurse2(concat(acc, x), iter.clone(), part2))
-                    || self.recurse2(acc * x, iter.clone(), part2)
-                    || self.recurse2(acc + x, iter, part2))
+                && ((part2 && self.recurse(concat(acc, x), iter.clone(), part2))
+                    || self.recurse(acc * x, iter.clone(), part2)
+                    || self.recurse(acc + x, iter, part2))
         } else {
             acc == self.total
         }
     }
 
     fn is_satisfiable(&self, part2: bool) -> bool {
-        self.recurse2(self.xs[0], self.xs[1..].iter().copied(), part2)
+        self.recurse(self.xs[0], self.xs[1..].iter().copied(), part2)
     }
 }
 
 fn concat(x: u64, y: u64) -> u64 {
-    let mut xx = x;
-    let mut yy = y;
-    while yy > 0 {
-        yy /= 10;
-        xx *= 10;
-    }
-    xx + y
+    // a sane implementation would be: let m = 10_u64.pow(y.ilog10() + 1);
+    let m = ((y >= 10) as u64 * 90 + (y >= 100) as u64 * 900 + (y >= 1000) as u64 * 9000) + 10;
+    m * x + y
 }
 
 impl FromStr for Equation {
