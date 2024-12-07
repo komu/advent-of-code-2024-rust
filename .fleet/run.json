@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "type": "cargo",
+            "name": "day 7",
+            "cargoArgs": [
+                "solve",
+                "07"
+            ],
+        },
+    ]
+}
