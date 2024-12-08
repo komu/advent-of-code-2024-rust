@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::HashSet;
 use std::ops::RangeInclusive;
 
 type Vec2 = advent_of_code::vec2::Vec2<i16>;
@@ -7,13 +7,18 @@ type Bounds = advent_of_code::bounds::Bounds<i16>;
 
 advent_of_code::solution!(8);
 
-fn antinodes(antennas: &[Vec2], range: RangeInclusive<i16>, bounds: Bounds, result: &mut BTreeSet<Vec2>) {
-    for (a, b) in antennas.iter().copied().tuple_combinations() {
-        let v = a - b;
+fn antinodes(
+    antennas: &[(char, Vec2)],
+    range: &RangeInclusive<i16>,
+    bounds: &Bounds,
+    result: &mut HashSet<Vec2>,
+) {
+    for ((_, a), (_, b)) in antennas.iter().tuple_combinations() {
+        let v = *a - *b;
 
         for (n, sign) in [(a, 1), (b, -1)] {
             for i in range.clone() {
-                let p = n + sign * i * v;
+                let p = *n + sign * i * v;
                 if bounds.in_bounds(p) {
                     result.insert(p);
                 } else {
@@ -25,18 +30,14 @@ fn antinodes(antennas: &[Vec2], range: RangeInclusive<i16>, bounds: Bounds, resu
 }
 
 fn solve(input: &str, range: RangeInclusive<i16>) -> u32 {
-    let mut antennas: BTreeMap<char, Vec<Vec2>> = BTreeMap::new();
+    let mut antennas: Vec<(char, Vec2)> = Vec::with_capacity(10000);
 
     let mut max_row = 0;
     let mut max_col = 0;
     for (y, row) in input.lines().enumerate() {
         for (x, c) in row.chars().enumerate() {
             if c != '.' {
-                let p = Vec2::new(x as i16, y as i16);
-                antennas
-                    .entry(c)
-                    .and_modify(|v| v.push(p))
-                    .or_insert_with(|| vec![p]);
+                antennas.push((c, Vec2::new(x as i16, y as i16)));
             }
             max_col = y;
         }
@@ -44,11 +45,20 @@ fn solve(input: &str, range: RangeInclusive<i16>) -> u32 {
     }
     let bounds = Bounds::new((max_col + 1) as i16, (max_row + 1) as i16);
 
-    let mut result = BTreeSet::<Vec2>::new();
-    for (_, points) in antennas.iter() {
-        antinodes(points, range.clone(), bounds, &mut result);
+    antennas.sort_by_key(|(c, _)| *c);
+
+    let mut result = HashSet::<Vec2>::new();
+    let mut prev_index = 0;
+    let mut prev = '.';
+    for (i, (c, _)) in antennas.iter().enumerate() {
+        if *c != prev {
+            antinodes(&antennas[prev_index..i], &range, &bounds, &mut result);
+            prev_index = i;
+            prev = *c;
+        }
     }
 
+    antinodes(&antennas[prev_index..], &range, &bounds, &mut result);
     result.len() as u32
 }
 

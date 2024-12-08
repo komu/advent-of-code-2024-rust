@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-#[derive(Eq, PartialEq, Copy, Clone, Debug, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, Copy, Clone, Debug, Ord, PartialOrd, Hash)]
 pub struct Vec2<T> {
     pub x: T,
     pub y: T,
