@@ -2,10 +2,18 @@
     "configurations": [
         {
             "type": "cargo",
-            "name": "day 7",
+            "name": "day 8",
             "cargoArgs": [
                 "solve",
-                "07"
+                "08"
+            ],
+        },
+        {
+            "type": "cargo",
+            "name": "test",
+            "cargoArgs": [
+                "test",
+                "08"
             ],
         },
     ]

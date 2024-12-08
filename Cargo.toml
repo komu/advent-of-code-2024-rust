@@ -32,6 +32,8 @@ itertools = "0.13.0"
 regex = "1.11.1"
 anyhow = "1.0.94"
 rayon = "1.10.0"
+num = "0.4.3"
+smallvec = "1.13.2"
 
 #[profile.release]
 #lto = true
