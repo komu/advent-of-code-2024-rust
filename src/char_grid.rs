@@ -1,6 +1,8 @@
 use crate::vec2::Vec2;
 use std::ops::Index;
 
+type Coordinate = Vec2<i32>;
+
 pub struct ByteGrid<'a> {
     data: &'a [u8],
     width: usize,
@@ -24,9 +26,13 @@ impl<'a> ByteGrid<'a> {
         }
     }
 
-    pub fn points(&self) -> impl Iterator<Item = Vec2<i32>> + '_ {
+    pub fn points(&self) -> impl Iterator<Item = Coordinate> + '_ {
         (0..self.height as i32)
             .flat_map(move |y| (0..self.width as i32).map(move |x| Vec2::new(x, y)))
+    }
+
+    pub fn find(&self, c: u8) -> Option<Coordinate> {
+        self.points().find(|p| self[p] == c)
     }
 
     pub fn dump(&self) {
@@ -46,7 +52,7 @@ impl<'a> ByteGrid<'a> {
         Some(self.data[self.index(x, y)])
     }
 
-    fn contains(&self, p: &Vec2<i32>) -> bool {
+    pub fn contains(&self, p: &Coordinate) -> bool {
         p.x >= 0 && (p.x as usize) < self.width && p.y >= 0 && (p.y as usize) < self.height
     }
 
@@ -56,10 +62,10 @@ impl<'a> ByteGrid<'a> {
     }
 }
 
-impl Index<&Vec2<i32>> for ByteGrid<'_> {
+impl Index<&Coordinate> for ByteGrid<'_> {
     type Output = u8;
 
-    fn index(&self, index: &Vec2<i32>) -> &Self::Output {
+    fn index(&self, index: &Coordinate) -> &Self::Output {
         if self.contains(index) {
             &self.data[self.index(index.x as usize, index.y as usize)]
         } else {
