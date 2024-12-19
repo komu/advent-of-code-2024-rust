@@ -1,4 +1,5 @@
 use std::ops::RangeInclusive;
+use rayon::prelude::*;
 
 advent_of_code::solution!(2);
 
@@ -28,7 +29,7 @@ fn is_safe_in(xs: &[i32], range: RangeInclusive<i32>, tolerate: bool) -> bool {
 }
 
 fn solve(input: &str, tolerate: bool) -> u32 {
-    input.lines().filter(|s| is_safe(s, tolerate)).count() as u32
+    input.par_lines().filter(|s| is_safe(s, tolerate)).count() as u32
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
