@@ -31,6 +31,10 @@ impl<'a> ByteGrid<'a> {
             .flat_map(move |y| (0..self.width as i32).map(move |x| Vec2::new(x, y)))
     }
 
+    pub fn find_all(&self, c: u8) -> impl Iterator<Item = Coordinate> + '_ {
+        self.points().filter(move |p| self[p] == c)
+    }
+
     pub fn find(&self, c: u8) -> Option<Coordinate> {
         self.points().find(|p| self[p] == c)
     }

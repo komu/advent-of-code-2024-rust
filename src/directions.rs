@@ -8,6 +8,13 @@ pub enum CardinalDirection {
     West,
 }
 
+pub const CARDINAL_DIRECTIONS: [CardinalDirection; 4] = [
+    CardinalDirection::North,
+    CardinalDirection::East,
+    CardinalDirection::South,
+    CardinalDirection::West,
+];
+
 impl CardinalDirection {
     pub fn to_vec(self) -> Vec2<i32> {
         use CardinalDirection::*;
