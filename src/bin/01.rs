@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use num::abs;
 
 advent_of_code::solution!(1);
@@ -17,25 +18,22 @@ pub fn part_one(input: &str) -> Option<u32> {
     xs.sort_unstable();
     ys.sort_unstable();
 
-    let sum = xs
-        .iter()
-        .zip(ys.iter())
-        .map(|(x, y)| abs(x - y))
-        .sum::<i32>();
-    Some(sum as u32)
+    Some(
+        xs.iter()
+            .zip(ys.iter())
+            .map(|(&x, &y)| abs(x - y))
+            .sum::<i32>() as u32,
+    )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
     let (xs, ys) = parse(input);
 
-    let mut ys_counts = std::collections::HashMap::new();
-    for &y in &ys {
-        *ys_counts.entry(y).or_insert(0) += 1;
-    }
+    let ys_counts = ys.iter().copied().counts();
 
     Some(
         xs.iter()
-            .map(|&x| x * ys_counts.get(&x).copied().unwrap_or(0))
+            .map(|x| x * (ys_counts.get(x).copied().unwrap_or(0) as i32))
             .sum::<i32>() as u32,
     )
 }
