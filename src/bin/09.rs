@@ -1,12 +1,14 @@
 use itertools::Itertools;
+use std::iter::repeat;
 use std::ops::Range;
+use BlockReservation::*;
 
 advent_of_code::solution!(9);
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 enum BlockReservation {
-    File(u16),
-    Free,
+    FileBlock(u16),
+    FreeBlock,
 }
 
 struct File {
@@ -20,25 +22,11 @@ struct Free {
     blocks: u32,
 }
 
-impl Free {
-    fn consume(&mut self, blocks: u32) {
-        self.offset += blocks;
-        self.blocks -= blocks;
-    }
-}
-
 impl BlockReservation {
     fn id(self: BlockReservation) -> u16 {
         match self {
-            BlockReservation::File(id) => id,
-            BlockReservation::Free => 0,
-        }
-    }
-
-    fn is_free(self: BlockReservation) -> bool {
-        match self {
-            BlockReservation::File(_) => false,
-            BlockReservation::Free => true,
+            FileBlock(id) => id,
+            FreeBlock => 0,
         }
     }
 }
@@ -48,12 +36,12 @@ fn defrag1(buffer: &mut Vec<BlockReservation>) -> u64 {
         .iter()
         .enumerate()
         .rev()
-        .filter(|&(_, v)| v.is_free())
+        .filter(|&(_, &v)| v == FreeBlock)
         .map(|(i, _)| i)
         .collect();
 
     while *empty_indices.last().unwrap() < buffer.len() {
-        if let Some(last @ BlockReservation::File(_)) = buffer.pop() {
+        if let Some(last @ FileBlock(_)) = buffer.pop() {
             buffer[empty_indices.pop().unwrap()] = last;
         }
     }
@@ -65,30 +53,61 @@ fn defrag1(buffer: &mut Vec<BlockReservation>) -> u64 {
         .sum()
 }
 
-fn defrag2(files: &[File], mut frees: Vec<Free>) -> u64 {
-    let mut cleanup_counter = 0;
-    let mut checksum: u64 = 0;
+struct FreeBlocks {
+    frees: Vec<Free>,
+    cleanup_counter: u32,
+}
 
-    for file in files.iter().rev() {
-        let free = find_first_free_block(&mut frees, file);
-        let target_offset = free.as_ref().map(|it| it.offset).unwrap_or(file.offset);
-
-        if let Some(free) = free {
-            free.consume(file.blocks);
-            if free.blocks == 0 {
-                cleanup_counter += 1;
-            }
+impl FreeBlocks {
+    fn new() -> Self {
+        FreeBlocks {
+            frees: Vec::new(),
+            cleanup_counter: 0,
         }
-
-        if cleanup_counter >= 250 {
-            frees.retain(|it| it.blocks > 0);
-            cleanup_counter = 0;
-        }
-
-        checksum += (file.id as u64) * sum(target_offset ..(target_offset + file.blocks))
     }
 
-    checksum
+    fn push(&mut self, offset: u32, blocks: u32) {
+        self.frees.push(Free { offset, blocks });
+    }
+
+    fn try_to_move(&mut self, file: &File) -> Option<u32> {
+        let first_free_block = self
+            .frees
+            .iter_mut()
+            .take_while(|b| b.offset < file.offset)
+            .find(|b| b.blocks >= file.blocks);
+
+        if let Some(free) = first_free_block {
+            let found_offset = free.offset;
+
+            free.offset += file.blocks;
+            free.blocks -= file.blocks;
+
+            if free.blocks == 0 {
+                self.cleanup_counter += 1;
+
+                if self.cleanup_counter > 100 {
+                    self.frees.retain(|it| it.blocks > 0);
+                    self.cleanup_counter = 0;
+                }
+            }
+
+            Some(found_offset)
+        } else {
+            None
+        }
+    }
+}
+
+fn defrag2(files: &[File], mut frees: FreeBlocks) -> u64 {
+    files
+        .iter()
+        .rev()
+        .map(|file| {
+            let target_offset = frees.try_to_move(file).unwrap_or(file.offset);
+            (file.id as u64) * sum(target_offset..(target_offset + file.blocks))
+        })
+        .sum()
 }
 
 fn sum(range: Range<u32>) -> u64 {
@@ -99,27 +118,26 @@ fn sum(range: Range<u32>) -> u64 {
     (sum_from_zero(range.end as i64) - sum_from_zero(range.start as i64)) as u64
 }
 
-fn find_first_free_block<'a>(frees: &'a mut [Free], file: &File) -> Option<&'a mut Free> {
-    frees
-        .iter_mut()
-        .take_while(|it| it.offset < file.offset)
-        .find(|it| it.blocks >= file.blocks)
+fn parse(input: &str) -> Vec<(u16, u32, u32)> {
+    input
+        .chars()
+        .map(|c| c.to_digit(10))
+        .chunks(2)
+        .into_iter()
+        .enumerate()
+        .map(|(id, mut chunk)| {
+            let (file_blocks, free_blocks) = chunk.next_tuple().unwrap();
+            (id as u16, file_blocks.unwrap(), free_blocks.unwrap_or(0))
+        })
+        .collect()
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
     let mut buffer = Vec::<BlockReservation>::new();
 
-    for (id, chunk) in input.chars().map(|c| c.to_digit(10)).chunks(2).into_iter().enumerate() {
-        let chunk = chunk.collect::<Vec<_>>();
-        let file_blocks = chunk[0].unwrap();
-        let free_block = chunk[1].unwrap_or(0);
-
-        for _ in 0..file_blocks {
-            buffer.push(BlockReservation::File(id as u16));
-        }
-        for _ in 0..free_block {
-            buffer.push(BlockReservation::Free);
-        }
+    for (id, blocks, free_blocks) in parse(input) {
+        buffer.extend(repeat(FileBlock(id)).take(blocks as usize));
+        buffer.extend(repeat(FreeBlock).take(free_blocks as usize));
     }
 
     Some(defrag1(&mut buffer))
@@ -128,18 +146,14 @@ pub fn part_one(input: &str) -> Option<u64> {
 pub fn part_two(input: &str) -> Option<u64> {
     let mut offset = 0;
     let mut files = Vec::<File>::new();
-    let mut frees = Vec::<Free>::new();
+    let mut frees = FreeBlocks::new();
 
-    for (id, chunk) in input.chars().map(|c| c.to_digit(10)).chunks(2).into_iter().enumerate() {
-        let chunk = chunk.collect::<Vec<_>>();
-        let file_blocks = chunk[0].unwrap();
-        let free_blocks = chunk[1].unwrap_or(0);
-
-        files.push(File { id: id as u16, offset, blocks: file_blocks });
-        offset += file_blocks;
+    for (id, blocks, free_blocks) in parse(input) {
+        files.push(File { id, offset, blocks });
+        offset += blocks;
 
         if free_blocks != 0 {
-            frees.push(Free { offset, blocks: free_blocks });
+            frees.push(offset, free_blocks);
             offset += free_blocks;
         }
     }
