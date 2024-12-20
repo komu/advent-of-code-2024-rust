@@ -3,7 +3,7 @@ use crate::grid::Grid;
 use crate::vec2::Vec2;
 use std::collections::VecDeque;
 use std::ops::{Index, Range};
-
+use rayon::prelude::*;
 type Coordinate = Vec2<i32>;
 
 pub struct ByteGrid<'a> {
@@ -40,6 +40,11 @@ impl<'a> ByteGrid<'a> {
     pub fn points(&self) -> impl Iterator<Item = Coordinate> + '_ {
         (0..self.height as i32)
             .flat_map(move |y| (0..self.width as i32).map(move |x| Vec2::new(x, y)))
+    }
+
+    pub fn par_points(&self) -> impl ParallelIterator<Item = Coordinate> + '_ {
+        (0..self.height as i32).into_par_iter()
+            .flat_map(move |y| (0..self.width as i32).into_par_iter().map(move |x| Vec2::new(x, y)))
     }
 
     pub fn find_all(&self, c: u8) -> impl Iterator<Item = Coordinate> + '_ {

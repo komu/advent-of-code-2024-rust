@@ -15,7 +15,7 @@ fn count_over_threshold(input: &str, distance: i32, threshold: u32) -> u32 {
     let normal_cost = from_start[&track_end];
 
     track
-        .points().par_bridge()
+        .par_points()
         .filter(|&p| track[&p] != b'#')
         .map(|start| {
             let mut result = 0;
