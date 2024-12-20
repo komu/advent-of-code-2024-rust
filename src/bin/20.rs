@@ -5,7 +5,7 @@ use rayon::prelude::*;
 
 advent_of_code::solution!(20);
 
-fn count_over_threshold(input: &str, distance: i32, threshold: u32) -> u32 {
+fn count_over_threshold(input: &str, distance: i32, threshold: u16) -> u32 {
     let track = ByteGrid::new(input);
     let track_start = track.find(b'S').unwrap();
     let track_end = track.find(b'E').unwrap();
@@ -17,16 +17,16 @@ fn count_over_threshold(input: &str, distance: i32, threshold: u32) -> u32 {
     track
         .par_points()
         .map(|start| (start, from_start[&start]))
-        .filter(|(_, cost)| *cost < u32::MAX)
+        .filter(|(_, cost)| *cost < u16::MAX)
         .map(|(start, cost_from_start)| {
             let mut result = 0;
             for dy in -distance..=distance {
                 let dx_range = distance - abs(dy);
                 for dx in -dx_range..=dx_range {
                     let end = Vec2::new(start.x + dx, start.y + dy);
-                    let cost_from_end = from_end.get(&end).copied().unwrap_or(u32::MAX);
-                    if cost_from_end < u32::MAX {
-                        let cheat_cost = (abs(dx) + abs(dy)) as u32;
+                    let cost_from_end = from_end.get(&end).copied().unwrap_or(u16::MAX);
+                    if cost_from_end < u16::MAX {
+                        let cheat_cost = (abs(dx) + abs(dy)) as u16;
                         let cost = cheat_cost + cost_from_start + cost_from_end;
                         if cheat_cost > 1 && cost < normal_cost && (normal_cost - cost) >= threshold {
                             result += 1;

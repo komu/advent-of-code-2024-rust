@@ -91,8 +91,8 @@ impl<'a> ByteGrid<'a> {
 }
 
 impl ByteGrid<'_> {
-    pub fn distances_from<T : Fn(u8) -> bool>(&self, start: Coordinate, accept: T) -> Grid<u32> {
-        let mut costs = Grid::<u32>::new(self.width, self.height, u32::MAX);
+    pub fn distances_from<T : Fn(u8) -> bool>(&self, start: Coordinate, accept: T) -> Grid<u16> {
+        let mut costs = Grid::<u16>::new(self.width, self.height, u16::MAX);
         costs[&start] = 0;
 
         let mut queue = VecDeque::new();
@@ -103,7 +103,7 @@ impl ByteGrid<'_> {
 
             for d in CARDINAL_DIRECTIONS {
                 let n = u + d.to_vec();
-                if accept(self[&n]) && costs[&n] == u32::MAX {
+                if accept(self[&n]) && costs[&n] == u16::MAX {
                     costs[&n] = cost + 1;
                     queue.push_back(n);
                 }
