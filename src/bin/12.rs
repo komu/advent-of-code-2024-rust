@@ -54,7 +54,7 @@ impl Region {
 
             if ps.len() == 1 || ps.len() == 3 {
                 corners += 1;
-            } else if ps.len() == 2 && ps[0].is_diagonal_neighbor(&ps[1]) {
+            } else if ps.len() == 2 && ps[0].is_diagonal_neighbor(ps[1]) {
                 corners += 2;
             }
         }
@@ -75,7 +75,7 @@ fn normalize_regions(grid: &ByteGrid) -> Grid<u32> {
             let value = grid[&p];
 
             result.flood(&p, id, &cardinal_neighbors, uninitialized, |p| {
-                grid[&p] == value
+                grid[p] == value
             });
             id += 1;
         }
