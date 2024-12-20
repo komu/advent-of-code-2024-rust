@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use num::abs;
 
 #[derive(Eq, PartialEq, Copy, Clone, Debug, Ord, PartialOrd, Hash)]
 pub struct Vec2<T> {
@@ -20,6 +21,20 @@ impl <T : std::ops::Add<T, Output = T>> std::ops::Add for Vec2<T> {
             x: self.x + rhs.x,
             y: self.y + rhs.y,
         }
+    }
+}
+
+impl Vec2<i32> {
+    pub fn squared_distance(&self, other: &Self) -> i32 {
+        (self.x - other.x).pow(2) + (self.y - other.y).pow(2)
+    }
+
+    pub fn is_cardinal_neighbor(&self, other: &Self) -> bool {
+        self.squared_distance(other) == 1
+    }
+
+    pub fn is_diagonal_neighbor(&self, other: &Self) -> bool {
+        abs(self.x - other.x) == 1 && abs(self.y - other.y) == 1
     }
 }
 

@@ -30,6 +30,14 @@ impl<'a> ByteGrid<'a> {
         }
     }
 
+    pub fn get_width(&self) -> usize {
+        self.width
+    }
+
+    pub fn get_height(&self) -> usize {
+        self.height
+    }
+
     pub fn x_range(&self) -> Range<usize> {
         0..self.width
     }
