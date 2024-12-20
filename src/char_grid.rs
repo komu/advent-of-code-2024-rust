@@ -1,8 +1,8 @@
-use std::collections::VecDeque;
-use crate::vec2::Vec2;
-use std::ops::{Index, Range};
 use crate::directions::CARDINAL_DIRECTIONS;
 use crate::grid::Grid;
+use crate::vec2::Vec2;
+use std::collections::VecDeque;
+use std::ops::{Index, Range};
 
 type Coordinate = Vec2<i32>;
 

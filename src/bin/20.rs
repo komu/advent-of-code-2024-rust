@@ -1,52 +1,45 @@
 use advent_of_code::char_grid::ByteGrid;
 use advent_of_code::vec2::Vec2;
-use hashbrown::HashSet;
 use num::abs;
+use rayon::prelude::*;
 
 advent_of_code::solution!(20);
 
-type Point = Vec2<i32>;
-
-#[derive(Eq, PartialEq, Clone, Hash)]
-struct Cheat {
-    start: Point,
-    end: Point,
-}
-
 fn count_over_threshold(input: &str, distance: i32, threshold: u32) -> u32 {
     let track = ByteGrid::new(input);
-    let start = track.find(b'S').unwrap();
-    let end = track.find(b'E').unwrap();
+    let track_start = track.find(b'S').unwrap();
+    let track_end = track.find(b'E').unwrap();
 
-    let from_start = track.distances_from(start, |c| c != b'#');
-    let from_end = track.distances_from(end, |c| c != b'#');
-    let normal_cost = from_start[&end];
+    let from_start = track.distances_from(track_start, |c| c != b'#');
+    let from_end = track.distances_from(track_end, |c| c != b'#');
+    let normal_cost = from_start[&track_end];
 
-    let mut cheats = HashSet::<Cheat>::new();
+    track
+        .points().par_bridge()
+        .filter(|&p| track[&p] != b'#')
+        .map(|start| {
+            let mut result = 0;
+            for dy in -distance..=distance {
+                let dx_range = distance - abs(dy);
+                for dx in -dx_range..=dx_range {
+                    let end = Vec2::new(start.x + dx, start.y + dy);
+                    if !track.contains(&end) || track[&end] == b'#' {
+                        continue;
+                    }
 
-    let mut result = 0;
-
-    for start in track.points() {
-        if track[&start] == b'#' { continue }
-
-        for dy in -distance..=distance {
-            let dx_range = distance - abs(dy);
-            for dx in -dx_range..=dx_range {
-                let end = Point::new(start.x + dx, start.y + dy);
-                if !track.contains(&end) || track[&end] == b'#' { continue }
-
-                let cheat_cost = (abs(dx) + abs(dy)) as i64;
-                if cheat_cost > 1 {
-                    let cost = cheat_cost + from_start[&start] as i64 + from_end[&end] as i64;
-                    let gain = (normal_cost as i64) - cost;
-                    if gain >= (threshold as i64) && cheats.insert(Cheat { start, end }) {
-                        result += 1;
+                    let cheat_cost = (abs(dx) + abs(dy)) as i64;
+                    if cheat_cost > 1 {
+                        let cost = cheat_cost + from_start[&start] as i64 + from_end[&end] as i64;
+                        let gain = (normal_cost as i64) - cost;
+                        if gain >= (threshold as i64) {
+                            result += 1;
+                        }
                     }
                 }
             }
-        }
-    }
-    result
+            result
+        })
+        .sum()
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -63,13 +56,29 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        assert_eq!(count_over_threshold(&advent_of_code::template::read_file("examples", DAY), 2, 2), 44);
-        assert_eq!(count_over_threshold(&advent_of_code::template::read_file("examples", DAY), 2, 10), 10);
+        assert_eq!(
+            count_over_threshold(&advent_of_code::template::read_file("examples", DAY), 2, 2),
+            44
+        );
+        assert_eq!(
+            count_over_threshold(&advent_of_code::template::read_file("examples", DAY), 2, 10),
+            10
+        );
     }
 
     #[test]
     fn test_part_two() {
-        assert_eq!(count_over_threshold(&advent_of_code::template::read_file("examples", DAY), 20, 2), 3081);
-        assert_eq!(count_over_threshold(&advent_of_code::template::read_file("examples", DAY), 20, 10), 2268);
+        assert_eq!(
+            count_over_threshold(&advent_of_code::template::read_file("examples", DAY), 20, 2),
+            3081
+        );
+        assert_eq!(
+            count_over_threshold(
+                &advent_of_code::template::read_file("examples", DAY),
+                20,
+                10
+            ),
+            2268
+        );
     }
 }
