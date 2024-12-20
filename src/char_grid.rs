@@ -1,5 +1,8 @@
+use std::collections::VecDeque;
 use crate::vec2::Vec2;
-use std::ops::Index;
+use std::ops::{Index, Range};
+use crate::directions::CARDINAL_DIRECTIONS;
+use crate::grid::Grid;
 
 type Coordinate = Vec2<i32>;
 
@@ -24,6 +27,14 @@ impl<'a> ByteGrid<'a> {
             width,
             height,
         }
+    }
+
+    pub fn x_range(&self) -> Range<usize> {
+        0..self.width
+    }
+
+    pub fn y_range(&self) -> Range<usize> {
+        0..self.height
     }
 
     pub fn points(&self) -> impl Iterator<Item = Coordinate> + '_ {
@@ -63,6 +74,31 @@ impl<'a> ByteGrid<'a> {
     fn index(&self, x: usize, y: usize) -> usize {
         // add 1 to line lengths for newlines
         y * (self.width + 1) + x
+    }
+}
+
+impl ByteGrid<'_> {
+    pub fn distances_from<T : Fn(u8) -> bool>(&self, start: Coordinate, accept: T) -> Grid<u32> {
+        let mut costs = Grid::<u32>::new(self.width, self.height, u32::MAX);
+        costs[&start] = 0;
+
+        let mut queue = VecDeque::new();
+        queue.push_back(start);
+
+        while let Some(u) = queue.pop_front() {
+            let cost = costs[&u];
+
+            for d in CARDINAL_DIRECTIONS {
+                let n = u + d.to_vec();
+                if accept(self[&n]) && costs[&n] == u32::MAX {
+                    costs[&n] = cost + 1;
+                    queue.push_back(n);
+                }
+
+            }
+        }
+
+        costs
     }
 }
 
