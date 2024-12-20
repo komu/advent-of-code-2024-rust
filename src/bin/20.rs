@@ -16,32 +16,25 @@ fn count_over_threshold(input: &str, distance: i32, threshold: u32) -> u32 {
 
     track
         .par_points()
-        .map(|start| {
-            let cost_from_start = from_start[&start];
-            if cost_from_start < u32::MAX {
-                let mut result = 0;
-                for dy in -distance..=distance {
-                    let dx_range = distance - abs(dy);
-                    for dx in -dx_range..=dx_range {
-                        let end = Vec2::new(start.x + dx, start.y + dy);
-                        let cost_from_end = from_end.get(&end).copied().unwrap_or(u32::MAX);
-                        if cost_from_end < u32::MAX {
-                            let cheat_cost = (abs(dx) + abs(dy)) as i64;
-                            if cheat_cost > 1 {
-                                let cost =
-                                    cheat_cost + cost_from_start as i64 + from_end[&end] as i64;
-                                let gain = (normal_cost as i64) - cost;
-                                if gain >= (threshold as i64) {
-                                    result += 1;
-                                }
-                            }
+        .map(|start| (start, from_start[&start]))
+        .filter(|(_, cost)| *cost < u32::MAX)
+        .map(|(start, cost_from_start)| {
+            let mut result = 0;
+            for dy in -distance..=distance {
+                let dx_range = distance - abs(dy);
+                for dx in -dx_range..=dx_range {
+                    let end = Vec2::new(start.x + dx, start.y + dy);
+                    let cost_from_end = from_end.get(&end).copied().unwrap_or(u32::MAX);
+                    if cost_from_end < u32::MAX {
+                        let cheat_cost = (abs(dx) + abs(dy)) as u32;
+                        let cost = cheat_cost + cost_from_start + cost_from_end;
+                        if cheat_cost > 1 && cost < normal_cost && (normal_cost - cost) >= threshold {
+                            result += 1;
                         }
                     }
                 }
-                result
-            } else {
-                0
             }
+            result
         })
         .sum()
 }
