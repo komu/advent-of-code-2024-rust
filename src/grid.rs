@@ -24,6 +24,14 @@ impl <T> Grid<T> {
         p.x >= 0 && (p.x as usize) < self.width && p.y >= 0 && (p.y as usize) < self.height
     }
 
+    pub fn get(&self, p: &Coordinate) -> Option<&T> {
+        if self.contains(p) {
+            Some(&self.data[self.offset(p.x as usize, p.y as usize)])
+        } else {
+            None
+        }
+    }
+
     fn offset(&self, x: usize, y: usize) -> usize {
         y * self.width + x
     }
