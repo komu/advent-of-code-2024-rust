@@ -22,10 +22,10 @@ pub fn part_one(input: &str) -> Option<u64> {
     Some(parse(input).map(|s| secret_sequence(s) as u64).sum())
 }
 
-const WINDOW_ID_SPACE: usize = 19*19*19*19;
+const WINDOW_ID_SPACE: usize = 2 << 19;
 
 fn next_window_id(window_id: usize, delta: i32) -> usize {
-    ((window_id * 19) + (delta + 9) as usize) % WINDOW_ID_SPACE
+    ((window_id << 5) | ((delta + 9) as usize)) & ((2 << 19) - 1)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
