@@ -33,7 +33,6 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut prices_by_window = vec![0; WINDOW_ID_SPACE];
     let mut seen = vec![0; WINDOW_ID_SPACE];
 
-    let mut best = 0;
     for (seller, secret) in secrets.enumerate() {
         let seller_id = seller + 1;
         let mut window_id: usize = 0;
@@ -47,9 +46,7 @@ pub fn part_two(input: &str) -> Option<u32> {
             window_id = next_window_id(window_id, delta);
             if i > 4 && seen[window_id] != seller_id {
                 seen[window_id] = seller_id;
-                let total_price = prices_by_window[window_id] + price;
-                best = best.max(total_price);
-                prices_by_window[window_id] = total_price;
+                prices_by_window[window_id] += price;
             }
 
             value = next_secret(value);
@@ -57,7 +54,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         }
     }
 
-    Some(best as u32)
+    Some((*prices_by_window.iter().max().unwrap()) as u32)
 }
 
 #[cfg(test)]
