@@ -22,10 +22,16 @@ pub fn part_one(input: &str) -> Option<u64> {
     Some(parse(input).map(|s| secret_sequence(s) as u64).sum())
 }
 
+const WINDOW_ID_SPACE: usize = 19*19*19*19;
+
+fn next_window_id(window_id: usize, delta: i32) -> usize {
+    ((window_id * 19) + (delta + 9) as usize) % WINDOW_ID_SPACE
+}
+
 pub fn part_two(input: &str) -> Option<u32> {
     let secrets = parse(input);
-    let mut prices_by_window = vec![0; 2 << 20];
-    let mut seen = vec![0; 2 << 20];
+    let mut prices_by_window = vec![0; WINDOW_ID_SPACE];
+    let mut seen = vec![0; WINDOW_ID_SPACE];
 
     let mut best = 0;
     for (seller, secret) in secrets.enumerate() {
@@ -38,7 +44,7 @@ pub fn part_two(input: &str) -> Option<u32> {
             let price = (value % 10) as i32;
             let delta = previous_price - price;
 
-            window_id = ((window_id << 5) | ((delta + 9) as usize)) & ((2 << 20) - 1);
+            window_id = next_window_id(window_id, delta);
             if i > 4 && seen[window_id] != seller_id {
                 seen[window_id] = seller_id;
                 let total_price = prices_by_window[window_id] + price;
