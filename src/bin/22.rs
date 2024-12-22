@@ -1,3 +1,6 @@
+use itertools::Itertools;
+use rayon::prelude::*;
+
 advent_of_code::solution!(22);
 
 fn next_secret(x: u32) -> u32 {
@@ -14,12 +17,14 @@ fn secret_sequence(secret: u32) -> u32 {
     (0..2000).fold(secret, |acc, _| next_secret(acc))
 }
 
-fn parse(input: &str) -> impl Iterator<Item = u32> + '_ {
-    input.lines().map(|s| s.parse::<u32>().unwrap())
-}
-
 pub fn part_one(input: &str) -> Option<u64> {
-    Some(parse(input).map(|s| secret_sequence(s) as u64).sum())
+    Some(
+        input
+            .lines()
+            .map(|s| s.parse::<u32>().unwrap())
+            .map(|s| secret_sequence(s) as u64)
+            .sum(),
+    )
 }
 
 const WINDOW_ID_SPACE: usize = 2 << 19;
@@ -28,8 +33,7 @@ fn next_window_id(window_id: usize, delta: i32) -> usize {
     ((window_id << 5) | ((delta + 9) as usize)) & ((2 << 19) - 1)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
-    let secrets = parse(input);
+fn process_batch(secrets: impl Iterator<Item=u32>) -> Vec<i32> {
     let mut prices_by_window = vec![0; WINDOW_ID_SPACE];
     let mut seen = vec![0; WINDOW_ID_SPACE];
 
@@ -54,7 +58,27 @@ pub fn part_two(input: &str) -> Option<u32> {
         }
     }
 
-    Some((*prices_by_window.iter().max().unwrap()) as u32)
+    prices_by_window
+}
+
+pub fn part_two(input: &str) -> Option<u32> {
+    fn merge_prices(mut prices1: Vec<i32>, prices2: Vec<i32>) -> Vec<i32> {
+        prices1
+            .iter_mut()
+            .zip(prices2)
+            .for_each(|(p1, p2)| *p1 += p2);
+        prices1
+    }
+
+    let prices = input
+        .lines()
+        .collect_vec()
+        .par_chunks(1200)
+        .map(|chunk| process_batch(chunk.into_iter().map(|s|s.parse::<u32>().unwrap())))
+        .reduce_with(merge_prices)
+        .unwrap();
+
+    Some((*prices.iter().max().unwrap()) as u32)
 }
 
 #[cfg(test)]
