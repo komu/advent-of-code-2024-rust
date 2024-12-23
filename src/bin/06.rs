@@ -42,7 +42,7 @@ fn path(grid: &ByteGrid, start: Vec2) -> HashSet<Vec2> {
             d = d.clockwise();
         }
 
-        p = p + d.to_vec();
+        p += d.to_vec();
     }
 
     seen

@@ -24,6 +24,13 @@ impl <T : std::ops::Add<T, Output = T>> std::ops::Add for Vec2<T> {
     }
 }
 
+impl <T : std::ops::AddAssign<T>> std::ops::AddAssign for Vec2<T> {
+    fn add_assign(&mut self, rhs: Self) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+    }
+}
+
 impl Vec2<i32> {
     pub fn squared_distance(&self, other: &Self) -> i32 {
         (self.x - other.x).pow(2) + (self.y - other.y).pow(2)
