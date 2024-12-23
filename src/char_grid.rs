@@ -1,10 +1,9 @@
 use crate::directions::CARDINAL_DIRECTIONS;
 use crate::grid::Grid;
 use crate::vec2::Vec2;
+use rayon::prelude::*;
 use std::collections::VecDeque;
 use std::ops::{Index, Range};
-use itertools::iproduct;
-use rayon::prelude::*;
 type Coordinate = Vec2<i32>;
 
 pub struct ByteGrid<'a> {
@@ -47,7 +46,8 @@ impl<'a> ByteGrid<'a> {
     }
 
     pub fn points(&self) -> impl Iterator<Item = Coordinate> + '_ {
-        iproduct!(0..self.height as i32, 0..self.width as i32).map(move |(x,y)| Vec2::new(x, y))
+        (0..self.height as i32)
+            .flat_map(move |y| (0..self.width as i32).map(move |x| Vec2::new(x, y)))
     }
 
     pub fn par_points(&self) -> impl ParallelIterator<Item = Coordinate> + '_ {
