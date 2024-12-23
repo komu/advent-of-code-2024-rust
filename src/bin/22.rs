@@ -74,7 +74,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         .lines()
         .collect_vec()
         .par_chunks(1200)
-        .map(|chunk| process_batch(chunk.into_iter().map(|s|s.parse::<u32>().unwrap())))
+        .map(|chunk| process_batch(chunk.iter().map(|s|s.parse::<u32>().unwrap())))
         .reduce_with(merge_prices)
         .unwrap();
 
