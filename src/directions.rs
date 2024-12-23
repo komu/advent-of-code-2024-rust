@@ -36,6 +36,16 @@ impl CardinalDirection {
         }
     }
 
+    pub fn counter_clockwise(self) -> Self {
+        use CardinalDirection::*;
+        match self {
+            North => West,
+            East => North,
+            South => East,
+            West => South,
+        }
+    }
+
     pub fn from_code(code: char) -> Self {
         use CardinalDirection::*;
         match code {
