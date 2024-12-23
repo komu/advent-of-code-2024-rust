@@ -1,11 +1,14 @@
 use advent_of_code::char_grid::ByteGrid;
 use advent_of_code::directions::CardinalDirection;
 use advent_of_code::directions::CardinalDirection::{East, North, South, West};
+use advent_of_code::grid::Grid;
 use advent_of_code::vec2::Vec2;
 
 advent_of_code::solution!(15);
 
 type Point = Vec2<i32>;
+
+const EMPTY: usize = usize::MAX;
 
 #[derive(Clone)]
 struct Box {
@@ -14,9 +17,6 @@ struct Box {
 }
 
 impl Box {
-    fn contains(&self, p: Point) -> bool {
-        p == self.west || p == self.east
-    }
 
     fn push(&mut self, d: CardinalDirection) {
         self.west += d.to_vec();
@@ -35,6 +35,7 @@ impl Box {
 struct Warehouse<'a> {
     boxes: Vec<Box>,
     grid: ByteGrid<'a>,
+    index_cache: Grid<usize>,
     robot: Point,
 }
 
@@ -43,74 +44,104 @@ impl Warehouse<'_> {
         self.grid[p] == b'#'
     }
 
-    fn can_move_towards(&self, p: Point, d: CardinalDirection) -> bool {
+    fn can_move_towards(
+        &self,
+        p: Point,
+        d: CardinalDirection,
+        moved_indices: &mut Vec<usize>,
+    ) -> bool {
+        self.can_move_towards_rec(p, d, moved_indices)
+    }
+
+    fn find_box_index_for(&self, p: Point) -> Option<usize> {
+        let index = self.index_cache[&p];
+        if index != EMPTY {
+            Some(index)
+        } else {
+            None
+        }
+    }
+
+    fn push_box(&mut self, index: usize, d: CardinalDirection) {
+        let b = &mut self.boxes[index];
+
+        self.index_cache[&b.west] = EMPTY;
+        self.index_cache[&b.east] = EMPTY;
+        b.push(d);
+        self.index_cache[&b.west] = index;
+        self.index_cache[&b.east] = index;
+    }
+
+    fn can_move_towards_rec(
+        &self,
+        p: Point,
+        d: CardinalDirection,
+        moved_indices: &mut Vec<usize>,
+    ) -> bool {
         let target = p + d.to_vec();
 
         if self.has_wall(&target) {
             return false;
         }
 
-        if let Some(b) = self.boxes.iter().find(|b| b.contains(target)) {
+        if let Some(index) = self.find_box_index_for(target) {
+            if !moved_indices.contains(&index) {
+                moved_indices.push(index);
+            }
+
+            let b = &self.boxes[index];
             match d {
                 North | South => {
                     if b.is_wide() {
-                        self.can_move_towards(b.west, d) && self.can_move_towards(b.east, d)
+                        self.can_move_towards_rec(b.west, d, moved_indices)
+                            && self.can_move_towards_rec(b.east, d, moved_indices)
                     } else {
-                        self.can_move_towards(b.west, d)
+                        self.can_move_towards_rec(b.west, d, moved_indices)
                     }
                 }
-                West => self.can_move_towards(b.west, d),
-                East => self.can_move_towards(b.east, d),
+                West => self.can_move_towards_rec(b.west, d, moved_indices),
+                East => self.can_move_towards_rec(b.east, d, moved_indices),
             }
         } else {
             true
         }
     }
 
-    fn push_towards(&mut self, p: Point, d: CardinalDirection) {
-        let target = p + d.to_vec();
-
-        if let Some(index) = self.boxes.iter().position(|b| b.contains(target)) {
-            let b = &self.boxes[index];
-            let east = b.east;
-            let west = b.west;
-
-            match d {
-                North | South => {
-                    if b.is_wide() {
-                        self.push_towards(west, d);
-                        self.push_towards(east, d)
-                    } else {
-                        self.push_towards(east, d);
-                    }
-                }
-                West => self.push_towards(west, d),
-                East => self.push_towards(east, d),
-            }
-
-            self.boxes[index].push(d);
-        }
-    }
-
     fn parse(input: &str) -> Warehouse {
         let grid = ByteGrid::new(input);
+        let mut index_cache = Grid::new(grid.get_width(), grid.get_height(), EMPTY);
 
         let mut boxes = Vec::with_capacity(grid.get_width() * grid.get_height() / 2);
         let east = East.to_vec();
+        let mut i = 0;
         for p in grid.points() {
             let v = grid[&p];
             match v {
-                b'O' => boxes.push(Box { west: p, east: p }),
-                b'[' => boxes.push(Box {
-                    west: p,
-                    east: p + east,
-                }),
+                b'O' => {
+                    boxes.push(Box { west: p, east: p });
+                    index_cache[&p] = i;
+                    i += 1;
+                }
+                b'[' => {
+                    boxes.push(Box {
+                        west: p,
+                        east: p + east,
+                    });
+                    index_cache[&p] = i;
+                    index_cache[&(p + east)] = i;
+                    i += 1;
+                }
                 _ => {}
             }
         }
 
         let robot = grid.find(b'@').expect("no robot");
-        Warehouse { boxes, grid, robot }
+        Warehouse {
+            boxes,
+            grid,
+            robot,
+            index_cache,
+        }
     }
 }
 
@@ -124,9 +155,14 @@ fn solve(input: &str) -> u32 {
         .map(CardinalDirection::from_code);
     let mut robot = warehouse.robot;
 
+    let mut moved_indices = Vec::with_capacity(16);
     for mv in moves {
-        if warehouse.can_move_towards(robot, mv) {
-            warehouse.push_towards(robot, mv);
+        moved_indices.clear();
+
+        if warehouse.can_move_towards(robot, mv, &mut moved_indices) {
+            for &index in moved_indices.iter().rev() {
+                warehouse.push_box(index, mv);
+            }
             robot += mv.to_vec();
         }
     }
