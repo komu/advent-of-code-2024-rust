@@ -35,4 +35,15 @@ impl CardinalDirection {
             West => North,
         }
     }
+
+    pub fn from_code(code: char) -> Self {
+        use CardinalDirection::*;
+        match code {
+            '^' => North,
+            '>' => East,
+            'v' => South,
+            '<' => West,
+            _ => panic!("invalid direction code: {}", code),
+        }
+    }
 }
