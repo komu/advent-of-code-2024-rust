@@ -38,7 +38,7 @@ impl Graph for Maze<'_> {
         node.p == self.end
     }
 
-    fn collect_neighbors(&self, node: &MazeState, neighbors: &mut Vec<(MazeState, u32)>) {
+    fn collect_neighbors(&self, node: &MazeState, neighbors: &mut Vec<(MazeState, u64)>) {
         assert!(self.grid.contains(&node.p));
 
         let forward = node.p + node.d.to_vec();
@@ -52,7 +52,7 @@ impl Graph for Maze<'_> {
     }
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
+pub fn part_one(input: &str) -> Option<u64> {
     let maze = Maze::parse(input);
     let start_state = MazeState { p: maze.start, d: East };
     shortest_path_len(&maze, start_state).map(|(_, len)| len)

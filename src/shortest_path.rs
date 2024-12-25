@@ -7,15 +7,15 @@ pub trait Graph {
     type Node: Eq + Hash + Clone;
 
     fn is_solution(&self, node: &Self::Node) -> bool;
-    fn collect_neighbors(&self, node: &Self::Node, neighbors: &mut Vec<(Self::Node, u32)>);
-    fn heuristic_distance(&self, _node: &Self::Node) -> u32 {
+    fn collect_neighbors(&self, node: &Self::Node, neighbors: &mut Vec<(Self::Node, u64)>);
+    fn heuristic_distance(&self, _node: &Self::Node) -> u64 {
         0
     }
 }
 
-pub fn shortest_path_len<G: Graph>(g: &G, start: G::Node) -> Option<(G::Node, u32)> {
-    let mut g_score = HashMap::<G::Node, u32>::new();
-    let mut open_set = PriorityQueue::<G::Node, Reverse<u32>>::new();
+pub fn shortest_path_len<G: Graph>(g: &G, start: G::Node) -> Option<(G::Node, u64)> {
+    let mut g_score = HashMap::<G::Node, u64>::new();
+    let mut open_set = PriorityQueue::<G::Node, Reverse<u64>>::new();
     let mut neighbors = Vec::new();
 
     g_score.insert(start.clone(), 0);
@@ -32,7 +32,7 @@ pub fn shortest_path_len<G: Graph>(g: &G, start: G::Node) -> Option<(G::Node, u3
         g.collect_neighbors(&current, &mut neighbors);
         for (neighbor, cost) in neighbors.drain(..) {
             let tentative_gscore = current_gscore + cost;
-            if tentative_gscore < g_score.get(&neighbor).copied().unwrap_or(u32::MAX) {
+            if tentative_gscore < g_score.get(&neighbor).copied().unwrap_or(u64::MAX) {
                 g_score.insert(neighbor.clone(), tentative_gscore);
 
                 let neighbor_score = tentative_gscore + g.heuristic_distance(&neighbor);
@@ -44,16 +44,16 @@ pub fn shortest_path_len<G: Graph>(g: &G, start: G::Node) -> Option<(G::Node, u3
     None
 }
 
-pub fn nodes_on_all_shortest_paths<G: Graph>(g: &G, start: G::Node) -> (u32, HashSet<G::Node>) {
+pub fn nodes_on_all_shortest_paths<G: Graph>(g: &G, start: G::Node) -> (u64, HashSet<G::Node>) {
     let initial = PathNode {
         point: start,
         total_cost: 0,
     };
-    let mut queue = PriorityQueue::<PathNode<G::Node>, Reverse<u32>>::new();
+    let mut queue = PriorityQueue::<PathNode<G::Node>, Reverse<u64>>::new();
     queue.push(initial, Reverse(0));
 
-    let mut costs = HashMap::<G::Node, u32>::new();
-    let mut best = u32::MAX;
+    let mut costs = HashMap::<G::Node, u64>::new();
+    let mut best = u64::MAX;
     let mut neighbors = Vec::new();
     let mut previous = HashMap::<G::Node, Vec<G::Node>>::new();
 
@@ -75,7 +75,7 @@ pub fn nodes_on_all_shortest_paths<G: Graph>(g: &G, start: G::Node) -> (u32, Has
             for (v, cost) in neighbors.drain(..) {
                 let new_cost = total_cost + cost;
 
-                let seen_cost = costs.get(&v).copied().unwrap_or(u32::MAX);
+                let seen_cost = costs.get(&v).copied().unwrap_or(u64::MAX);
                 if new_cost < seen_cost {
                     costs.insert(v.clone(), new_cost);
                     queue.push(u.extend(v.clone(), new_cost), Reverse(new_cost));
@@ -107,11 +107,11 @@ pub fn nodes_on_all_shortest_paths<G: Graph>(g: &G, start: G::Node) -> (u32, Has
 #[derive(Eq, PartialEq, Hash, Clone)]
 struct PathNode<T> {
     point: T,
-    total_cost: u32,
+    total_cost: u64,
 }
 
 impl<T: Clone> PathNode<T> {
-    fn extend(&self, point: T, total_cost: u32) -> PathNode<T> {
+    fn extend(&self, point: T, total_cost: u64) -> PathNode<T> {
         PathNode { point, total_cost }
     }
 }
