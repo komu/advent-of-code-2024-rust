@@ -1,51 +1,40 @@
+use advent_of_code::binary_search::binary_search;
 use advent_of_code::directions::CARDINAL_DIRECTIONS;
-use advent_of_code::shortest_path::{shortest_path_len, Graph};
 use advent_of_code::vec2::Vec2;
 use hashbrown::HashSet;
 use itertools::Itertools;
+use std::collections::VecDeque;
 
 advent_of_code::solution!(18);
 
 type Point = Vec2<i32>;
 
-struct Corrupted<'a> {
-    corrupted: &'a HashSet<Point>,
-    target: Point,
-    size: i32,
-}
+fn path_length(corrupted: &HashSet<Point>, size: i32) -> Option<u32> {
+    let start = Point::new(0, 0);
+    let end = Point::new(size, size);
 
-impl<'a> Graph for Corrupted<'a> {
-    type Node = Point;
+    let mut seen = HashSet::<Point>::new();
+    seen.insert(start);
 
-    fn is_solution(&self, &node: &Self::Node) -> bool {
-        node == self.target
-    }
+    let mut queue = VecDeque::<(Point, u32)>::new();
+    queue.push_back((Point::new(0, 0), 0));
 
-    fn collect_neighbors(&self, &node: &Self::Node, neighbors: &mut Vec<(Self::Node, u32)>) {
-        // TODO: optimize for uniform cost
-        for d in CARDINAL_DIRECTIONS {
-            let p = node + d.to_vec();
-            if self.is_in_bounds(&p) && !self.corrupted.contains(&p) {
-                neighbors.push((p, 1));
+    while let Some((u, cost)) = queue.pop_front() {
+        if u == end {
+            return Some(cost);
+        } else {
+            for d in CARDINAL_DIRECTIONS {
+                let p = u + d.to_vec();
+                if p.x >= 0 && p.x <= size && p.y >= 0 && p.y <= size && !corrupted.contains(&p) {
+                    if seen.insert(p) {
+                        queue.push_back((p, cost + 1));
+                    }
+                }
             }
         }
     }
-}
 
-impl Corrupted<'_> {
-    fn is_in_bounds(&self, &p: &Point) -> bool {
-        p.x >= 0 && p.x <= self.size && p.y >= 0 && p.y <= self.size
-    }
-}
-
-fn path_length(corrupted: &HashSet<Point>, size: i32) -> Option<u32> {
-    let corrupted = Corrupted {
-        corrupted,
-        target: Point::new(size, size),
-        size,
-    };
-
-    shortest_path_len(&corrupted, Point::new(0, 0)).map(|(_, cost)| cost)
+    None
 }
 
 fn parse(input: &str) -> impl Iterator<Item = Point> + '_ {
@@ -60,18 +49,14 @@ fn solve1(input: &str, size: i32, take: usize) -> u32 {
 fn solve2(input: &str, size: i32) -> String {
     let points = parse(input).collect_vec();
 
-    // TODO: binary search for position
-    let mut corrupted = HashSet::new();
-    for (i, corrupted_point) in points.iter().enumerate() {
-        println!("{}/{}", i, points.len());
-        corrupted.insert(*corrupted_point);
-        if path_length(&corrupted, size).is_none() {
-            let p = points[i];
-            return format!("{},{}", p.x, p.y)
-        }
-    }
+    let i = binary_search(0..points.len(), |&i| {
+        let corrupted_points = points.iter().take(i).cloned().collect::<HashSet<_>>();
+        path_length(&corrupted_points, size).is_none()
+    })
+    .unwrap();
 
-    panic!("did not found");
+    let p = points[i - 1];
+    format!("{},{}", p.x, p.y)
 }
 
 pub fn part_one(input: &str) -> Option<u32> {

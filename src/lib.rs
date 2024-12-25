@@ -7,3 +7,4 @@ pub mod collections;
 pub mod template;
 pub mod vec2;
 pub mod shortest_path;
+pub mod binary_search;
