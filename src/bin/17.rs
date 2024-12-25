@@ -35,15 +35,15 @@ impl VM<'_> {
             self.ip += 2;
 
             match inst {
-                0 => self.a = self.a / (1 << self.combo(operand)),
-                1 => self.b = self.b ^ (operand as u64),
+                0 => self.a /= 1 << self.combo(operand),
+                1 => self.b ^= operand as u64,
                 2 => self.b = self.combo(operand) % 8,
                 3 => {
                     if self.a != 0 {
                         self.ip = operand as usize
                     }
                 }
-                4 => self.b = self.b ^ self.c,
+                4 => self.b ^= self.c,
                 5 => {
                     self.output.push((self.combo(operand) % 8) as u32);
                     return;

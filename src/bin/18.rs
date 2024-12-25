@@ -25,10 +25,14 @@ fn path_length(corrupted: &HashSet<Point>, size: i32) -> Option<u32> {
         } else {
             for d in CARDINAL_DIRECTIONS {
                 let p = u + d.to_vec();
-                if p.x >= 0 && p.x <= size && p.y >= 0 && p.y <= size && !corrupted.contains(&p) {
-                    if seen.insert(p) {
-                        queue.push_back((p, cost + 1));
-                    }
+                if p.x >= 0
+                    && p.x <= size
+                    && p.y >= 0
+                    && p.y <= size
+                    && !corrupted.contains(&p)
+                    && seen.insert(p)
+                {
+                    queue.push_back((p, cost + 1));
                 }
             }
         }

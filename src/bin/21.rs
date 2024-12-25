@@ -118,7 +118,7 @@ struct MyGraph<'a, T, U> {
     costs: &'a Costs<T>,
 }
 
-impl<'a, T: Copy + Eq + Hash, U: Copy + Eq + Hash> Graph for MyGraph<'a, T, U> {
+impl<T: Copy + Eq + Hash, U: Copy + Eq + Hash> Graph for MyGraph<'_, T, U> {
     type Node = PathState<T, U>;
 
     fn is_solution(&self, node: &Self::Node) -> bool {

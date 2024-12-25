@@ -43,7 +43,7 @@ fn evaluate(gates: &HashMap<&str, Gate>, inputs: &HashMap<&str, bool>) -> u64 {
 
     for &z in gates.keys().filter(|&w| is_output_wire(w)).sorted().rev() {
         value <<= 1;
-        if evaluate_wire(&z, gates, &mut wire_values) {
+        if evaluate_wire(z, gates, &mut wire_values) {
             value |= 1;
         }
     }

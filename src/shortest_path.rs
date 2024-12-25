@@ -44,6 +44,7 @@ pub fn shortest_path_len<G: Graph>(g: &G, start: G::Node) -> Option<(G::Node, u6
     None
 }
 
+#[allow(clippy::comparison_chain)]
 pub fn nodes_on_all_shortest_paths<G: Graph>(g: &G, start: G::Node) -> (u64, HashSet<G::Node>) {
     let initial = PathNode {
         point: start,
