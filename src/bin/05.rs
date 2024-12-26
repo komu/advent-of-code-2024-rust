@@ -1,6 +1,6 @@
+use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 use std::cmp::Ordering;
-use std::collections::{HashMap, HashSet};
 
 advent_of_code::solution!(5);
 

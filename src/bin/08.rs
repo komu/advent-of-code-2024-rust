@@ -1,5 +1,5 @@
+use hashbrown::HashSet;
 use itertools::Itertools;
-use std::collections::HashSet;
 use std::ops::RangeInclusive;
 
 type Vec2 = advent_of_code::vec2::Vec2<i16>;

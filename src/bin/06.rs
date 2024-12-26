@@ -1,6 +1,6 @@
 use advent_of_code::char_grid::ByteGrid;
 use advent_of_code::directions::CardinalDirection;
-use std::collections::HashSet;
+use hashbrown::HashSet;
 
 type Vec2 = advent_of_code::vec2::Vec2<i32>;
 
@@ -59,11 +59,11 @@ pub fn part_two(input: &str) -> Option<u32> {
     let map = ByteGrid::new(input);
     let start = map.find(b'^').unwrap();
 
-    let mut candidates_obstacles = path(&map, start);
-    candidates_obstacles.remove(&start);
+    let mut candidate_obstacles = path(&map, start);
+    candidate_obstacles.remove(&start);
 
     Some(
-        candidates_obstacles
+        candidate_obstacles
             .iter()
             .filter(|&it| has_loop(&map, it, start))
             .count() as u32,
