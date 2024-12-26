@@ -20,7 +20,7 @@ fn secret_sequence(secret: u32) -> u32 {
 pub fn part_one(input: &str) -> Option<u64> {
     Some(
         input
-            .lines()
+            .par_lines()
             .map(|s| s.parse::<u32>().unwrap())
             .map(|s| secret_sequence(s) as u64)
             .sum(),
