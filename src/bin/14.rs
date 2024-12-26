@@ -1,5 +1,3 @@
-use advent_of_code::vec2::DIRECTIONS;
-use hashbrown::HashSet;
 use itertools::Itertools;
 
 advent_of_code::solution!(14);
@@ -15,6 +13,7 @@ struct RobotSpace {
     w: i32,
     h: i32,
     robots: Vec<Robot>,
+    counts: Vec<u8>,
 }
 
 impl RobotSpace {
@@ -22,10 +21,15 @@ impl RobotSpace {
         let w = self.w;
         let h = self.h;
         for robot in &mut self.robots {
-            robot.p = Vec2::new(
-                (robot.p.x + robot.v.x + w) % w,
-                (robot.p.y + robot.v.y + h) % h,
-            )
+            let old_index = robot.p.y * w + robot.p.x;
+
+            robot.p.x = (robot.p.x + robot.v.x + w) % w;
+            robot.p.y = (robot.p.y + robot.v.y + h) % h;
+
+            let new_index = robot.p.y * w + robot.p.x;
+
+            self.counts[old_index as usize] -= 1;
+            self.counts[new_index as usize] += 1;
         }
     }
 
@@ -47,11 +51,7 @@ impl RobotSpace {
     }
 
     fn has_tree(&self) -> bool {
-        let points = self.robots.iter().map(|r| r.p).collect::<HashSet<_>>();
-
-        self.robots
-            .iter()
-            .any(|r| DIRECTIONS.iter().all(|&d| points.contains(&(r.p + d))))
+        self.counts.iter().all(|&c| c <= 1)
     }
 
     fn checksum(&self) -> u32 {
@@ -70,18 +70,27 @@ impl RobotSpace {
             Vec2::new(x.parse().unwrap(), y.parse().unwrap())
         }
 
+        let mut counts = vec![0; (w * h) as usize];
         let robots = input
             .lines()
             .map(|s| {
                 let (ps, vs) = s.split_once(' ').unwrap();
 
+                let p = parse_vec(ps);
+                counts[p.y as usize * w as usize + p.x as usize] += 1;
                 Robot {
-                    p: parse_vec(ps),
+                    p,
                     v: parse_vec(vs),
                 }
             })
             .collect_vec();
-        RobotSpace { w, h, robots }
+
+        RobotSpace {
+            w,
+            h,
+            robots,
+            counts,
+        }
     }
 }
 
