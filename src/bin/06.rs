@@ -1,6 +1,8 @@
 use advent_of_code::char_grid::ByteGrid;
 use advent_of_code::directions::CardinalDirection;
 use hashbrown::HashSet;
+use itertools::Itertools;
+use rayon::prelude::*;
 
 type Vec2 = advent_of_code::vec2::Vec2<i32>;
 
@@ -29,7 +31,7 @@ fn has_loop(grid: &ByteGrid, obstruction: &Vec2, start: Vec2) -> bool {
     false
 }
 
-fn path(grid: &ByteGrid, start: Vec2) -> HashSet<Vec2> {
+fn points_on_path(grid: &ByteGrid, start: Vec2) -> HashSet<Vec2> {
     let mut seen = HashSet::<Vec2>::new();
 
     let mut d = CardinalDirection::North;
@@ -52,19 +54,21 @@ pub fn part_one(input: &str) -> Option<u32> {
     let map = ByteGrid::new(input);
     let start = map.find(b'^').unwrap();
 
-    Some(path(&map, start).len() as u32)
+    Some(points_on_path(&map, start).len() as u32)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
     let map = ByteGrid::new(input);
     let start = map.find(b'^').unwrap();
 
-    let mut candidate_obstacles = path(&map, start);
+    let mut candidate_obstacles = points_on_path(&map, start);
     candidate_obstacles.remove(&start);
 
     Some(
         candidate_obstacles
             .iter()
+            .collect_vec()
+            .par_iter()
             .filter(|&it| has_loop(&map, it, start))
             .count() as u32,
     )
