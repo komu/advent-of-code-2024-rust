@@ -1,30 +1,25 @@
-use anyhow::anyhow;
-use itertools::Itertools;
 use rayon::prelude::*;
-use std::str::FromStr;
 
 advent_of_code::solution!(7);
 
-struct Equation {
-    total: u64,
-    xs: Vec<u64>,
-}
-
-impl Equation {
-    fn recurse<I: Iterator<Item = u64> + Clone>(&self, acc: u64, mut iter: I, part2: bool) -> bool {
+fn is_satisfiable(total: u64, xs: &[u64], part2: bool) -> bool {
+    fn recurse<I: Iterator<Item = u64> + Clone>(
+        total: u64,
+        acc: u64,
+        mut iter: I,
+        part2: bool,
+    ) -> bool {
         if let Some(x) = iter.next() {
-            acc < self.total
-                && ((part2 && self.recurse(concat(acc, x), iter.clone(), part2))
-                    || self.recurse(acc * x, iter.clone(), part2)
-                    || self.recurse(acc + x, iter, part2))
+            acc < total
+                && ((part2 && recurse(total, concat(acc, x), iter.clone(), part2))
+                    || recurse(total, acc * x, iter.clone(), part2)
+                    || recurse(total, acc + x, iter, part2))
         } else {
-            acc == self.total
+            acc == total
         }
     }
 
-    fn is_satisfiable(&self, part2: bool) -> bool {
-        self.recurse(self.xs[0], self.xs[1..].iter().copied(), part2)
-    }
+    recurse(total, xs[0], xs[1..].iter().copied(), part2)
 }
 
 fn concat(x: u64, y: u64) -> u64 {
@@ -33,24 +28,14 @@ fn concat(x: u64, y: u64) -> u64 {
     m * x + y
 }
 
-impl FromStr for Equation {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (total, xs) = s.split_once(": ").ok_or(anyhow!("can't split"))?;
-
-        Ok(Equation {
-            total: total.parse()?,
-            xs: xs.split(' ').map(str::parse).try_collect()?,
-        })
-    }
-}
-
 fn solve(input: &str, part2: bool) -> Option<u64> {
     fn handle(s: &str, part2: bool) -> u64 {
-        let e = s.parse::<Equation>().unwrap();
-        if e.is_satisfiable(part2) {
-            e.total
+        let (total, xs) = s.split_once(": ").unwrap();
+        let total: u64 = total.parse().unwrap();
+        let xs: Vec<u64> = xs.split(' ').map(|s| s.parse().unwrap()).collect();
+
+        if is_satisfiable(total, &xs, part2) {
+            total
         } else {
             0
         }
