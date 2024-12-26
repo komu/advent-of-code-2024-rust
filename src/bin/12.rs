@@ -4,6 +4,7 @@ use advent_of_code::grid::Grid;
 use advent_of_code::vec2::Vec2;
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
+use rayon::prelude::*;
 
 advent_of_code::solution!(12);
 
@@ -102,13 +103,19 @@ fn extract_regions(input: &str) -> impl Iterator<Item = Region> {
 pub fn part_one(input: &str) -> Option<u32> {
     Some(
         extract_regions(input)
+            .par_bridge()
             .map(|r| r.size() * r.perimeter())
             .sum(),
     )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    Some(extract_regions(input).map(|r| r.size() * r.sides()).sum())
+    Some(
+        extract_regions(input)
+            .par_bridge()
+            .map(|r| r.size() * r.sides())
+            .sum(),
+    )
 }
 
 #[cfg(test)]
