@@ -1,5 +1,5 @@
-use std::ops::RangeInclusive;
 use rayon::prelude::*;
+use std::ops::RangeInclusive;
 
 advent_of_code::solution!(2);
 
@@ -19,10 +19,10 @@ fn is_safe_in(xs: &[i32], range: RangeInclusive<i32>, tolerate: bool) -> bool {
     for &value in &xs[1..] {
         if range.contains(&(value - prev)) {
             prev = value
-        }  else if may_ignore {
+        } else if may_ignore {
             may_ignore = false
         } else {
-            return false
+            return false;
         }
     }
     true

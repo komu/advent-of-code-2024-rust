@@ -44,23 +44,47 @@ impl Graph for Maze<'_> {
         let forward = node.p + node.d.to_vec();
 
         if self.grid.contains(&forward) && self.grid[&forward] != b'#' {
-            neighbors.push((MazeState { p: forward, d: node.d }, 1));
+            neighbors.push((
+                MazeState {
+                    p: forward,
+                    d: node.d,
+                },
+                1,
+            ));
         }
 
-        neighbors.push((MazeState { p: node.p, d: node.d.clockwise() }, 1000));
-        neighbors.push((MazeState { p: node.p, d: node.d.counter_clockwise() }, 1000));
+        neighbors.push((
+            MazeState {
+                p: node.p,
+                d: node.d.clockwise(),
+            },
+            1000,
+        ));
+        neighbors.push((
+            MazeState {
+                p: node.p,
+                d: node.d.counter_clockwise(),
+            },
+            1000,
+        ));
     }
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
     let maze = Maze::parse(input);
-    let start_state = MazeState { p: maze.start, d: East };
+    let start_state = MazeState {
+        p: maze.start,
+        d: East,
+    };
     shortest_path_len(&maze, start_state).map(|(_, len)| len)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
     let maze = Maze::parse(input);
-    let start_state = MazeState { p: maze.start, d: East };
+    let start_state = MazeState {
+        p: maze.start,
+        d: East,
+    };
     let (_, states) = nodes_on_all_shortest_paths(&maze, start_state);
     let points = states.iter().map(|s| s.p).unique().count();
     Some(points as u32)
@@ -72,19 +96,25 @@ mod tests {
 
     #[test]
     fn test_part_one_1() {
-        let result = part_one(&advent_of_code::template::read_file_part("examples", DAY, 1));
+        let result = part_one(&advent_of_code::template::read_file_part(
+            "examples", DAY, 1,
+        ));
         assert_eq!(result, Some(7036));
     }
 
     #[test]
     fn test_part_one_2() {
-        let result = part_one(&advent_of_code::template::read_file_part("examples", DAY, 2));
+        let result = part_one(&advent_of_code::template::read_file_part(
+            "examples", DAY, 2,
+        ));
         assert_eq!(result, Some(11048));
     }
 
     #[test]
     fn test_part_two() {
-        let result = part_two(&advent_of_code::template::read_file_part("examples", DAY, 2));
+        let result = part_two(&advent_of_code::template::read_file_part(
+            "examples", DAY, 2,
+        ));
         assert_eq!(result, Some(64));
     }
 }

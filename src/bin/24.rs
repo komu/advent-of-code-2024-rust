@@ -19,8 +19,11 @@ fn is_output_wire(w: &str) -> bool {
 }
 
 fn evaluate(gates: &HashMap<&str, Gate>, inputs: &HashMap<&str, bool>) -> u64 {
-
-    fn evaluate_wire(wire: &str, gates: &HashMap<&str, Gate>, wire_values: &mut HashMap<&str, bool>) -> bool {
+    fn evaluate_wire(
+        wire: &str,
+        gates: &HashMap<&str, Gate>,
+        wire_values: &mut HashMap<&str, bool>,
+    ) -> bool {
         if let Some(&value) = wire_values.get(wire) {
             value
         } else {
@@ -54,8 +57,10 @@ fn evaluate(gates: &HashMap<&str, Gate>, inputs: &HashMap<&str, bool>) -> u64 {
 // The problem talks about detecting which pairs need to be swapped, but that's misleading,
 // since the output is just a sorted list of wires. We don't even need to detect the pairs,
 // just wires that are bad.
-fn find_bad_wires<'a, 'b : 'a>(gates: &'b HashMap<&'a str, Gate>) -> Vec<&'a str> {
-    fn is_wired_to_inputs(gate: &Gate) -> bool { is_input_wire(gate.lhs) && is_input_wire(gate.rhs) }
+fn find_bad_wires<'a, 'b: 'a>(gates: &'b HashMap<&'a str, Gate>) -> Vec<&'a str> {
+    fn is_wired_to_inputs(gate: &Gate) -> bool {
+        is_input_wire(gate.lhs) && is_input_wire(gate.rhs)
+    }
 
     let mut bad = Vec::new();
 

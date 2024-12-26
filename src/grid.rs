@@ -35,7 +35,7 @@ impl<T> Grid<T> {
     }
 
     pub fn points(&self) -> impl Iterator<Item = Coordinate> + '_ {
-        iproduct!(0..self.height as i32, 0..self.width as i32).map(move |(x,y)| Vec2::new(x, y))
+        iproduct!(0..self.height as i32, 0..self.width as i32).map(move |(x, y)| Vec2::new(x, y))
     }
 
     fn offset(&self, x: usize, y: usize) -> usize {

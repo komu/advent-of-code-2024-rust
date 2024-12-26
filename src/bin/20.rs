@@ -28,7 +28,8 @@ fn count_over_threshold(input: &str, distance: i32, threshold: u16) -> u32 {
                     if cost_from_end < u16::MAX {
                         let cheat_cost = (abs(dx) + abs(dy)) as u16;
                         let cost = cheat_cost + cost_from_start + cost_from_end;
-                        if cheat_cost > 1 && cost < normal_cost && (normal_cost - cost) >= threshold {
+                        if cheat_cost > 1 && cost < normal_cost && (normal_cost - cost) >= threshold
+                        {
                             result += 1;
                         }
                     }

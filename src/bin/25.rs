@@ -1,5 +1,5 @@
-use itertools::Itertools;
 use advent_of_code::collections::transpose;
+use itertools::Itertools;
 
 advent_of_code::solution!(25);
 
@@ -8,9 +8,12 @@ fn parse(input: &str) -> (Vec<Vec<u32>>, Vec<Vec<u32>>) {
     let mut keys = Vec::new();
 
     for entry in input.split("\n\n") {
-        let chars = entry.lines().map(|s|s.chars().collect_vec()).collect_vec();
+        let chars = entry.lines().map(|s| s.chars().collect_vec()).collect_vec();
         let transposed = transpose(chars);
-        let heights = transposed.iter().map(|row| row.iter().filter(|c| **c == '#').count() as u32).collect_vec();
+        let heights = transposed
+            .iter()
+            .map(|row| row.iter().filter(|c| **c == '#').count() as u32)
+            .collect_vec();
         if entry.starts_with(".....") {
             keys.push(heights);
         } else if entry.starts_with("#####") {
@@ -24,14 +27,16 @@ fn parse(input: &str) -> (Vec<Vec<u32>>, Vec<Vec<u32>>) {
 }
 
 fn overlaps(key: &[u32], lock: &[u32]) -> bool {
-    key.iter().zip(lock.iter()).all(|(x,y)|  x + y < 8)
+    key.iter().zip(lock.iter()).all(|(x, y)| x + y < 8)
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-
     let (locks, keys) = parse(input);
 
-    let sum = locks.iter().map(|l| keys.iter().filter(|k| overlaps(l, k)).count()).sum::<usize>();
+    let sum = locks
+        .iter()
+        .map(|l| keys.iter().filter(|k| overlaps(l, k)).count())
+        .sum::<usize>();
 
     Some(sum as u32)
 }

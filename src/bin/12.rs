@@ -50,7 +50,10 @@ impl Region {
 
         let mut corners = 0;
         for block in blocks {
-            let ps = block.iter().filter(|&p| self.points.contains(p)).collect_vec();
+            let ps = block
+                .iter()
+                .filter(|&p| self.points.contains(p))
+                .collect_vec();
 
             if ps.len() == 1 || ps.len() == 3 {
                 corners += 1;

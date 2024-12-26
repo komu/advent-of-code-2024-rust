@@ -1,7 +1,7 @@
+use anyhow::{anyhow, bail};
 use num::abs;
 use std::fmt::Debug;
 use std::str::FromStr;
-use anyhow::{anyhow, bail};
 
 #[derive(Eq, PartialEq, Copy, Clone, Debug, Ord, PartialOrd, Hash)]
 pub struct Vec2<T> {
@@ -97,8 +97,10 @@ impl<T: FromStr> FromStr for Vec2<T> {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Some((x, y)) = s.split_once(',') {
             Ok(Vec2 {
-                x: x.parse().map_err(|_| anyhow!("failed to parse x coordinate from '{s}'"))?,
-                y: y.parse().map_err(|_| anyhow!("failed to parse y coordinate from '{s}'"))?,
+                x: x.parse()
+                    .map_err(|_| anyhow!("failed to parse x coordinate from '{s}'"))?,
+                y: y.parse()
+                    .map_err(|_| anyhow!("failed to parse y coordinate from '{s}'"))?,
             })
         } else {
             bail!("missing comma in point '{s}'");

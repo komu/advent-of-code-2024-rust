@@ -24,24 +24,48 @@ fn solve(input: &str, part2: bool) -> u32 {
 
     for b in input.bytes() {
         macro_rules! reset {
-            () => { if enabled && b == b'm' { M } else if part2 && b == b'd' { D } else { E } };
+            () => {
+                if enabled && b == b'm' {
+                    M
+                } else if part2 && b == b'd' {
+                    D
+                } else {
+                    E
+                }
+            };
         }
 
         macro_rules! expect {
             ($expected:expr, $next:ident) => {
-                if b == $expected { $next } else { reset!() }
-            }
+                if b == $expected {
+                    $next
+                } else {
+                    reset!()
+                }
+            };
         }
 
         macro_rules! expect_first_digit {
             ($next:ident, $var:ident) => {
-                if b.is_ascii_digit() { $var = value(b); $next } else { reset!() }
+                if b.is_ascii_digit() {
+                    $var = value(b);
+                    $next
+                } else {
+                    reset!()
+                }
             };
         }
 
         macro_rules! expect_next_digit {
             ($next:ident, $var:ident, $after:expr, $after_state:expr) => {
-                if b.is_ascii_digit() { $var = $var * 10 + value(b); $next } else if b == $after { $after_state } else { reset!() }
+                if b.is_ascii_digit() {
+                    $var = $var * 10 + value(b);
+                    $next
+                } else if b == $after {
+                    $after_state
+                } else {
+                    reset!()
+                }
             };
         }
 
@@ -53,14 +77,39 @@ fn solve(input: &str, part2: bool) -> u32 {
             MULP => expect_first_digit!(NUM1, num1),
             NUM1 => expect_next_digit!(NUM1, num1, b',', COMMA),
             COMMA => expect_first_digit!(NUM2, num2),
-            NUM2 => expect_next_digit!(NUM2, num2, b')', { sum += num1 * num2; E} ),
+            NUM2 => expect_next_digit!(NUM2, num2, b')', {
+                sum += num1 * num2;
+                E
+            }),
             D => expect!(b'o', DO),
-            DO => if b == b'n' { DON } else if b == b'(' { DOP } else { reset!() },
-            DOP => if b == b')' { enabled = true; E } else { reset!() },
+            DO => {
+                if b == b'n' {
+                    DON
+                } else if b == b'(' {
+                    DOP
+                } else {
+                    reset!()
+                }
+            }
+            DOP => {
+                if b == b')' {
+                    enabled = true;
+                    E
+                } else {
+                    reset!()
+                }
+            }
             DON => expect!(b'\'', DON_),
             DON_ => expect!(b't', DON_T),
             DON_T => expect!(b'(', DON_TP),
-            DON_TP => if b == b')' { enabled = false; E } else { reset!() },
+            DON_TP => {
+                if b == b')' {
+                    enabled = false;
+                    E
+                } else {
+                    reset!()
+                }
+            }
         };
     }
     sum

@@ -33,7 +33,7 @@ fn next_window_id(window_id: usize, delta: i32) -> usize {
     ((window_id << 5) | ((delta + 9) as usize)) & ((2 << 19) - 1)
 }
 
-fn process_batch(secrets: impl Iterator<Item=u32>) -> Vec<i32> {
+fn process_batch(secrets: impl Iterator<Item = u32>) -> Vec<i32> {
     let mut prices_by_window = vec![0; WINDOW_ID_SPACE];
     let mut seen = vec![0; WINDOW_ID_SPACE];
 
@@ -74,7 +74,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         .lines()
         .collect_vec()
         .par_chunks(1200)
-        .map(|chunk| process_batch(chunk.iter().map(|s|s.parse::<u32>().unwrap())))
+        .map(|chunk| process_batch(chunk.iter().map(|s| s.parse::<u32>().unwrap())))
         .reduce_with(merge_prices)
         .unwrap();
 

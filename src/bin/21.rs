@@ -1,9 +1,9 @@
 use advent_of_code::shortest_path::{shortest_path_len, Graph};
 use hashbrown::HashMap;
 use std::hash::Hash;
-use strum_macros::{EnumIter, EnumString};
-use strum::IntoEnumIterator;
 use std::str::FromStr;
+use strum::IntoEnumIterator;
+use strum_macros::{EnumIter, EnumString};
 
 advent_of_code::solution!(21);
 
@@ -98,7 +98,7 @@ impl<T: Eq + Hash + Copy> Costs<T> {
             button_to_press,
             transitions,
             button_a,
-            costs: self
+            costs: self,
         };
         shortest_path_len(&graph, initial_state).unwrap().1
     }

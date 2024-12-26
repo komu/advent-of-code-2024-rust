@@ -5,10 +5,10 @@ use itertools::Itertools;
 advent_of_code::solution!(23);
 
 struct Graph<'a> {
-    neighbors: HashMap<&'a str, HashSet<&'a str>>
+    neighbors: HashMap<&'a str, HashSet<&'a str>>,
 }
 
-impl <'a> Graph<'a> {
+impl<'a> Graph<'a> {
     fn parse(input: &str) -> Graph {
         let mut neighbors = HashMap::<&str, HashSet<&str>>::new();
         for line in input.lines() {

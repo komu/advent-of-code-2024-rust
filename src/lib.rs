@@ -1,10 +1,10 @@
+pub mod binary_search;
 pub mod bounds;
 pub mod char_grid;
+pub mod collections;
 pub mod directions;
 pub mod grid;
 pub mod numeric;
-pub mod collections;
+pub mod shortest_path;
 pub mod template;
 pub mod vec2;
-pub mod shortest_path;
-pub mod binary_search;

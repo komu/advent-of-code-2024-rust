@@ -71,7 +71,6 @@ pub fn nodes_on_all_shortest_paths<G: Graph>(g: &G, start: G::Node) -> (u64, Has
             best = total_cost;
             final_states.push(u.point);
         } else {
-
             g.collect_neighbors(&u.point, &mut neighbors);
             for (v, cost) in neighbors.drain(..) {
                 let new_cost = total_cost + cost;

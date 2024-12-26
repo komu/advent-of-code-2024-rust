@@ -17,7 +17,6 @@ struct Box {
 }
 
 impl Box {
-
     fn push(&mut self, d: CardinalDirection) {
         self.west += d.to_vec();
         self.east += d.to_vec();

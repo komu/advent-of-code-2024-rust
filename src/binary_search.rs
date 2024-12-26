@@ -1,7 +1,12 @@
 /// Returns the first value of range for which the predicate returns true
 pub fn binary_search<T>(range: std::ops::Range<T>, predicate: impl Fn(&T) -> bool) -> Option<T>
 where
-    T: Clone + Ord + std::ops::Add<Output = T> + std::ops::Sub<Output = T> + std::ops::Div<Output = T> + From<u8>,
+    T: Clone
+        + Ord
+        + std::ops::Add<Output = T>
+        + std::ops::Sub<Output = T>
+        + std::ops::Div<Output = T>
+        + From<u8>,
 {
     let mut low = range.start;
     let mut high = range.end;

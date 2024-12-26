@@ -13,7 +13,6 @@ pub struct ByteGrid<'a> {
 }
 
 impl<'a> ByteGrid<'a> {
-
     pub fn new(input: &'a str) -> Self {
         let width = input.lines().next().map_or(0, |line| line.len());
         debug_assert!(
@@ -51,8 +50,11 @@ impl<'a> ByteGrid<'a> {
     }
 
     pub fn par_points(&self) -> impl ParallelIterator<Item = Coordinate> + '_ {
-        (0..self.height as i32).into_par_iter()
-            .flat_map(move |y| (0..self.width as i32).into_par_iter().map(move |x| Vec2::new(x, y)))
+        (0..self.height as i32).into_par_iter().flat_map(move |y| {
+            (0..self.width as i32)
+                .into_par_iter()
+                .map(move |x| Vec2::new(x, y))
+        })
     }
 
     pub fn find_all(&self, c: u8) -> impl Iterator<Item = Coordinate> + '_ {
@@ -91,7 +93,7 @@ impl<'a> ByteGrid<'a> {
 }
 
 impl ByteGrid<'_> {
-    pub fn distances_from<T : Fn(u8) -> bool>(&self, start: Coordinate, accept: T) -> Grid<u16> {
+    pub fn distances_from<T: Fn(u8) -> bool>(&self, start: Coordinate, accept: T) -> Grid<u16> {
         let mut costs = Grid::<u16>::new(self.width, self.height, u16::MAX);
         costs[&start] = 0;
 
@@ -107,7 +109,6 @@ impl ByteGrid<'_> {
                     costs[&n] = cost + 1;
                     queue.push_back(n);
                 }
-
             }
         }
 

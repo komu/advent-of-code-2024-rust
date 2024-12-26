@@ -1,6 +1,6 @@
 use advent_of_code::char_grid::ByteGrid;
-use std::collections::HashSet;
 use advent_of_code::directions::CardinalDirection;
+use std::collections::HashSet;
 
 type Vec2 = advent_of_code::vec2::Vec2<i32>;
 
@@ -16,7 +16,7 @@ fn has_loop(grid: &ByteGrid, obstruction: &Vec2, start: Vec2) -> bool {
 
         while grid[&next] == b'#' || next == *obstruction {
             if !seen.insert((p, d)) {
-                return true
+                return true;
             }
 
             d = d.clockwise();
@@ -62,7 +62,12 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut candidates_obstacles = path(&map, start);
     candidates_obstacles.remove(&start);
 
-    Some(candidates_obstacles.iter().filter(|&it| has_loop(&map, it, start)).count() as u32)
+    Some(
+        candidates_obstacles
+            .iter()
+            .filter(|&it| has_loop(&map, it, start))
+            .count() as u32,
+    )
 }
 
 #[cfg(test)]
