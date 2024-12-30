@@ -10,7 +10,7 @@ fn is_satisfiable(total: u64, xs: &[u64], part2: bool) -> bool {
         part2: bool,
     ) -> bool {
         if let Some(x) = iter.next() {
-            acc < total
+            acc <= total
                 && ((part2 && recurse(total, concat(acc, x), iter.clone(), part2))
                     || recurse(total, acc * x, iter.clone(), part2)
                     || recurse(total, acc + x, iter, part2))
