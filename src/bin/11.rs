@@ -31,6 +31,7 @@ fn solve(input: &str, total_rounds: u8) -> u64 {
     }
 
     input
+        .trim()
         .par_split(' ')
         .map(|s| recurse(s.parse().unwrap(), total_rounds, &mut HashMap::new()))
         .sum()
