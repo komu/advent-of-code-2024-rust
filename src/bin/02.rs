@@ -4,23 +4,32 @@ use std::ops::RangeInclusive;
 advent_of_code::solution!(2);
 
 fn is_safe(line: &str, tolerate: bool) -> bool {
-    let values = line
+    let xs = line
         .split_whitespace()
         .map(|s| s.parse::<i32>().unwrap())
         .collect::<Vec<_>>();
 
-    is_safe_in(&values, 1..=3, tolerate) || is_safe_in(&values, -3..=-1, tolerate)
+    if tolerate {
+        (0..xs.len()).any(|i| is_safe_in_either_direction(&xs, i))
+    } else {
+        is_safe_in_either_direction(&xs, usize::MAX)
+    }
 }
 
-fn is_safe_in(xs: &[i32], range: RangeInclusive<i32>, tolerate: bool) -> bool {
-    let mut may_ignore = tolerate;
+fn is_safe_in_either_direction(xs: &[i32], ignored: usize) -> bool {
+    is_safe_towards(xs, 1..=3, ignored) || is_safe_towards(xs, -3..=-1, ignored)
+}
+
+fn is_safe_towards(xs: &[i32], range: RangeInclusive<i32>, ignored: usize) -> bool {
+    if ignored == 0 {
+        return is_safe_towards(&xs[1..], range, usize::MAX);
+    }
 
     let mut prev = xs[0];
-    for &value in &xs[1..] {
-        if range.contains(&(value - prev)) {
+    for (i, &value) in xs[1..].iter().enumerate() {
+        if i + 1 == ignored {
+        } else if range.contains(&(value - prev)) {
             prev = value
-        } else if may_ignore {
-            may_ignore = false
         } else {
             return false;
         }
