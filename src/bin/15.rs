@@ -61,14 +61,18 @@ impl Warehouse<'_> {
         }
     }
 
-    fn push_box(&mut self, index: usize, d: CardinalDirection) {
+    fn add_to_cache(&mut self, index: usize) {
+        let b = &mut self.boxes[index];
+
+        self.index_cache[&b.west] = index;
+        self.index_cache[&b.east] = index;
+    }
+
+    fn remove_from_cache(&mut self, index: usize) {
         let b = &mut self.boxes[index];
 
         self.index_cache[&b.west] = EMPTY;
         self.index_cache[&b.east] = EMPTY;
-        b.push(d);
-        self.index_cache[&b.west] = index;
-        self.index_cache[&b.east] = index;
     }
 
     fn can_move_towards_rec(
@@ -159,8 +163,12 @@ fn solve(input: &str) -> u32 {
         moved_indices.clear();
 
         if warehouse.can_move_towards(robot, mv, &mut moved_indices) {
+            for &index in moved_indices.iter() {
+                warehouse.remove_from_cache(index);
+            }
             for &index in moved_indices.iter().rev() {
-                warehouse.push_box(index, mv);
+                warehouse.boxes[index].push(mv);
+                warehouse.add_to_cache(index);
             }
             robot += mv.to_vec();
         }
