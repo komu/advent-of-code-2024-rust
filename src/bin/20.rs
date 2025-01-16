@@ -54,29 +54,15 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        assert_eq!(
-            count_over_threshold(&advent_of_code::template::read_file("examples", DAY), 2, 2),
-            44
-        );
-        assert_eq!(
-            count_over_threshold(&advent_of_code::template::read_file("examples", DAY), 2, 10),
-            10
-        );
+        let input = advent_of_code::template::read_file("examples", DAY);
+        assert_eq!(count_over_threshold(&input, 2, 2), 44);
+        assert_eq!(count_over_threshold(&input, 2, 10), 10);
     }
 
     #[test]
     fn test_part_two() {
-        assert_eq!(
-            count_over_threshold(&advent_of_code::template::read_file("examples", DAY), 20, 2),
-            3081
-        );
-        assert_eq!(
-            count_over_threshold(
-                &advent_of_code::template::read_file("examples", DAY),
-                20,
-                10
-            ),
-            2268
-        );
+        let input = advent_of_code::template::read_file("examples", DAY);
+        assert_eq!(count_over_threshold(&input, 20, 2), 3081);
+        assert_eq!(count_over_threshold(&input, 20, 10), 2268);
     }
 }
